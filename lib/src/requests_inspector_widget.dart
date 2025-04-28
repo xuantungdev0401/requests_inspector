@@ -117,15 +117,109 @@ class RequestsInspector extends StatelessWidget {
   }
 }
 
+class InspectorScreen extends StatelessWidget {
+  const InspectorScreen({
+    super.key,
+    bool enabled = true,
+    bool hideInspectorBanner = false,
+    ShowInspectorOn showInspectorOn = ShowInspectorOn.Both,
+    GlobalKey<NavigatorState>? navigatorKey,
+  })  : _enabled = enabled,
+        _hideInspectorBanner = hideInspectorBanner,
+        _showInspectorOn = showInspectorOn,
+        _navigatorKey = navigatorKey;
+
+  ///Require hot restart for showing its change
+  final bool _enabled;
+  final bool _hideInspectorBanner;
+  final ShowInspectorOn _showInspectorOn;
+
+  final GlobalKey<NavigatorState>? _navigatorKey;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget widget = ChangeNotifierProvider(
+      create: (context) => InspectorController(
+        enabled: _enabled,
+        showInspectorOn: _isSupportShaking()
+            ? _showInspectorOn
+            : ShowInspectorOn.LongPress,
+        onStoppingRequest: (requestDetails) => _showRequestEditorDialog(
+          context,
+          requestDetails: requestDetails,
+        ),
+        onStoppingResponse: (responseData) => _showResponseEditorDialog(
+          context,
+          responseData: responseData,
+        ),
+      ),
+      builder: (context, _) {
+        final inspectorController = context.read<InspectorController>();
+        return WillPopScope(
+          onWillPop: () async =>
+          inspectorController.pageController.page == 0,
+          child: _Inspector(
+            fromPushScreen: true,
+          ),
+        );
+      },
+    );
+
+    if (!_hideInspectorBanner && _enabled)
+      widget = Banner(
+        message: 'INSPECTOR',
+        textDirection: TextDirection.ltr,
+        location: BannerLocation.topEnd,
+        child: widget,
+      );
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: widget,
+    );
+  }
+
+  bool _isSupportShaking() =>
+      kIsWeb ? false : Platform.isAndroid || Platform.isIOS;
+
+  Future<RequestDetails?> _showRequestEditorDialog(
+      BuildContext context, {
+        required RequestDetails requestDetails,
+      }) {
+    if (_navigatorKey?.currentContext == null) return Future.value(null);
+    return showDialog<RequestDetails?>(
+      context: _navigatorKey!.currentContext!,
+      builder: (context) =>
+          RequestStopperEditorDialog(requestDetails: requestDetails),
+    );
+  }
+
+  Future _showResponseEditorDialog(
+      BuildContext context, {
+        required responseData,
+      }) {
+    if (_navigatorKey?.currentContext == null) return Future.value(null);
+
+    return showDialog(
+      context: _navigatorKey!.currentContext!,
+      builder: (context) =>
+          ResponseStopperEditorDialog(responseData: responseData),
+    );
+  }
+}
+
+
 class _Inspector extends StatelessWidget {
   const _Inspector({
     super.key,
     GlobalKey<NavigatorState>? navigatorKey,
+    this.fromPushScreen = false,
   }) : _navigatorKey = navigatorKey;
 
   final GlobalKey<NavigatorState>? _navigatorKey;
+  final bool fromPushScreen;
 
-  bool showStopperDialogsAllowed() => _navigatorKey?.currentContext != null;
+  bool showStopperDialogsAllowed() => fromPushScreen || _navigatorKey?.currentContext != null;
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +242,9 @@ class _Inspector extends StatelessWidget {
       backgroundColor: Colors.black,
       title: const Text('Inspector 🕵'),
       leading: IconButton(
-        onPressed: inspectorController.hideInspector,
+        onPressed: fromPushScreen ? () {
+          Navigator.pop(context);
+        } : inspectorController.hideInspector,
         icon: const Icon(Icons.close),
         color: Colors.white,
       ),
