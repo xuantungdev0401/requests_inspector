@@ -15,7 +15,7 @@ typedef StoppingResponseCallback = Future Function(dynamic responseData);
 ///Singleton
 class InspectorController extends ChangeNotifier {
   factory InspectorController({
-    bool enabled = false,
+    bool enabled = true,
     ShowInspectorOn showInspectorOn = ShowInspectorOn.Shaking,
     StoppingRequestCallback? onStoppingRequest,
     StoppingResponseCallback? onStoppingResponse,
@@ -37,7 +37,7 @@ class InspectorController extends ChangeNotifier {
         _onStoppingRequest = onStoppingRequest,
         _onStoppingResponse = onStoppingResponse {
     if (_enabled && _allowShaking)
-      _shakeDetector = ShakeDetector.autoStart(
+      _shakeDetector ??= ShakeDetector.autoStart(
         onPhoneShake: showInspector,
         minimumShakeCount: 3,
       );
@@ -47,7 +47,7 @@ class InspectorController extends ChangeNotifier {
 
   late final bool _enabled;
   late final ShowInspectorOn _showInspectorOn;
-  late final ShakeDetector _shakeDetector;
+  ShakeDetector? _shakeDetector;
   StoppingRequestCallback? _onStoppingRequest;
   StoppingResponseCallback? _onStoppingResponse;
 
@@ -91,6 +91,12 @@ class InspectorController extends ChangeNotifier {
   set responseStopperEnabled(bool value) {
     if (_responseStopperEnabled == value) return;
     _responseStopperEnabled = value;
+    notifyListeners();
+  }
+
+  set enabled(bool value) {
+    if (_enabled == value) return;
+    _enabled = value;
     notifyListeners();
   }
 
@@ -161,8 +167,8 @@ class InspectorController extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (_allowShaking) _shakeDetector.stopListening();
-    _singleton = null;
+    _shakeDetector?.stopListening();
+    // _singleton = null;
     super.dispose();
   }
 

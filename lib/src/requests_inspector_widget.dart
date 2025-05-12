@@ -138,8 +138,8 @@ class InspectorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget widget = ChangeNotifierProvider(
-      create: (context) => InspectorController(
+    Widget widget = ChangeNotifierProvider.value(
+      value: InspectorController(
         enabled: _enabled,
         showInspectorOn: _isSupportShaking()
             ? _showInspectorOn
