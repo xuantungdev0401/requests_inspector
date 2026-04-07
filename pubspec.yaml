@@ -18,8 +18,8 @@ dependencies:
   flutter:
     sdk: flutter
   gql: ^1.0.1-alpha+1730759315362
-  graphql: ^5.2.0-beta.10
-  graphql_flutter: ^5.2.0-beta.8
+#  graphql: ^5.2.0-beta.10
+#  graphql_flutter: ^5.2.0-beta.8
   provider: ^6.0.5
   sensors_plus: ^6.1.0
   share_plus: ^11.0.0

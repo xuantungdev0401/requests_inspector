@@ -1,3 +1,4 @@
+/*
 import 'dart:async';
 import 'package:graphql/client.dart';
 import 'package:gql/language.dart';
@@ -73,3 +74,4 @@ class GraphQLInspectorLink extends Link {
     }
   }
 }
+ */

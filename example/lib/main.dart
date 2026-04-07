@@ -47,6 +47,7 @@ Future<List<Post>> fetchPostsUsingInterceptor() async {
   return posts;
 }
 
+/*
 Future<List<Post>> fetchPostsGraphQlUsingGraphQLFlutterInterceptor() async {
   final client = GraphQLClient(
     cache: GraphQLCache(),
@@ -70,6 +71,7 @@ Future<List<Post>> fetchPostsGraphQlUsingGraphQLFlutterInterceptor() async {
   var post = Post.fromMap(result.data?['post']);
   return [post];
 }
+*/
 
 class Post {
   final int userId;
